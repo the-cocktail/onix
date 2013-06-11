@@ -13,5 +13,9 @@ module ONIX
     xml_accessor :publisher_name,       :from => "PublisherName"
     xml_accessor :website,              :from => "Website", :as => ONIX::Website
 
+    def link
+      website.website_link if website
+    end
+
   end
 end

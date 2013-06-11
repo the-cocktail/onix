@@ -22,5 +22,7 @@ module ONIX
     xml_accessor :titles_after_names,   :from => "TitlesAfterNames"
     xml_accessor :corporate_name,       :from => "CorporateName"
     xml_accessor :biographical_note,    :from => "BiographicalNote"
+
+
   end
 end

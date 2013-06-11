@@ -18,5 +18,24 @@ module ONIX
       self.publishers = []
     end
 
+    def main_imprint
+      imprints.detect{|imp| imprint_identifier and imprint_identifier.imprint_id_type == 1 }
+    end
+
+    def main_publisher
+      publishers.detect{|pub| pub.publishing_role == 1 }
+    end
+
+    def date
+      publishing_date.date if publishing_date
+    end
+
+    def available_in?(country)
+      if sales_rights and sales_rights.territory and sales_rights.territory.countries_included
+        sales_rights.territory.countries_included.include? country
+      end
+    end
+
+
   end
 end

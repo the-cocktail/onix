@@ -14,5 +14,15 @@ module ONIX
     xml_accessor :territory, :from => "Territory", :as => Territory
 
 
+    def tax_included?
+      [2,4,7,,9,12,14,17,22,24,27,42].include? price_type
+    end
+
+    def tax_excluded?
+      !tax_included?
+    end
+
+    
+
   end
 end

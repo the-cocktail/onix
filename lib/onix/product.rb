@@ -20,6 +20,65 @@ module ONIX
       self.product_identifiers = []
       self.product_supplies = []
     end
-    
+
+    # NotificationType
+    #########################
+
+    def create?
+      [1,2,3,8,9,12,13,14].include? notification_type
+    end
+
+    def update?
+      notification_type == 4
+    end
+
+    def delete?
+      notification_type == 5
+    end
+
+    # ProductIdentifiers
+    #########################
+    def product_identifier_by_id(id)
+      product_identifiers.detect{|pi| pi.product_id_type == id}
+    end
+
+    { 3 => :id_gtin13,
+      15 => :id_isbn13,
+      1 => :id_propietary
+    }.each do |identifier, method_name|
+      send :define_method, method_name do
+        identifier = product_identifier_by_id(identifier)
+        identifier.id_value if identifier        
+      end
+    end
+
+    def product_supply_for(country)
+      product_supplies.detect do |ps|
+        ps.market and 
+        ps.market.territory and
+        ps.market.territory.countries_included and 
+        ps.market.territory.countries_included.include?(country)
+      end
+    end
+
+    # Accesos a cosas más usadas
+    ############################
+
+    def collection
+      descriptive_detail.collection
+    end
+
+    def title
+      descriptive_detail.title
+    end
+
+    def imprints
+      publishing_detail.imprints
+    end
+
+    def publishers
+      publishing_detail.publishers
+    end
+
   end
 end
