@@ -15,7 +15,7 @@ module ONIX
 
 
     def tax_included?
-      [2,4,7,,9,12,14,17,22,24,27,42].include? price_type
+      [2,4,7,9,12,14,17,22,24,27,42].include? price_type
     end
 
     def tax_excluded?

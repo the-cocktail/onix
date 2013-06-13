@@ -47,37 +47,48 @@ module ONIX
       1 => :id_propietary
     }.each do |identifier, method_name|
       send :define_method, method_name do
-        identifier = product_identifier_by_id(identifier)
-        identifier.id_value if identifier        
+        prod_id = product_identifier_by_id(identifier)
+        prod_id.id_value if prod_id
       end
     end
 
     def product_supply_for(country)
       product_supplies.detect do |ps|
-        ps.market and 
-        ps.market.territory and
-        ps.market.territory.countries_included and 
-        ps.market.territory.countries_included.include?(country)
+        ps.supply_detail and 
+        ps.supply_detail.price and
+        ps.supply_detail.price.territory and
+        ps.supply_detail.price.territory.countries_included and 
+        ps.supply_detail.price.territory.countries_included.include?(country)
       end
     end
 
     # Accesos a cosas más usadas
     ############################
 
+    def main_contributor
+      descriptive_detail.main_contributor if descriptive_detail
+    end
+
     def collection
-      descriptive_detail.collection
+      descriptive_detail.collection if descriptive_detail
     end
 
     def title
-      descriptive_detail.title
+      descriptive_detail.title if descriptive_detail
     end
 
     def imprints
-      publishing_detail.imprints
+      publishing_detail.imprints if publishing_detail
     end
 
     def publishers
-      publishing_detail.publishers
+      publishing_detail.publishers if publishing_detail
+    end
+
+    def price_amount(country='ES')
+      if supply = product_supply_for(country)
+        supply.price_amount 
+      end
     end
 
   end

@@ -52,5 +52,9 @@ module ONIX
     	supply_detail and supply_detail.product_availability%10 == 9
     end
 
+    def price_amount
+      supply_detail.price_amount if supply_detail
+    end
+
   end
 end
