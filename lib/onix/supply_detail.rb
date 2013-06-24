@@ -8,7 +8,7 @@ module ONIX
 
     xml_accessor :supplier, :from => "Supplier", :as => ONIX::Supplier
     xml_accessor :product_availability, :from => "ProductAvailability", :as => Fixnum, :to_xml => ONIX::Formatters.two_digit 
-    xml_accessor :price, :from => "Price", :as => ONIX::Price
+    xml_accessor :prices, :from => "Price", :as => [ONIX::Price]
 
     def price_amount
 			price.price_amount if price    	

@@ -39,26 +39,16 @@ module ONIX
     # ProductIdentifiers
     #########################
     def product_identifier_by_id(id)
-      product_identifiers.detect{|pi| pi.product_id_type == id}
+      product_identifiers.find{|pi| pi.product_id_type == id}
     end
 
-    { 3 => :id_gtin13,
+    { 3  => :id_gtin13,
       15 => :id_isbn13,
-      1 => :id_propietary
+      1  => :id_propietary
     }.each do |identifier, method_name|
       send :define_method, method_name do
         prod_id = product_identifier_by_id(identifier)
         prod_id.id_value if prod_id
-      end
-    end
-
-    def product_supply_for(country)
-      product_supplies.detect do |ps|
-        ps.supply_detail and 
-        ps.supply_detail.price and
-        ps.supply_detail.price.territory and
-        ps.supply_detail.price.territory.countries_included and 
-        ps.supply_detail.price.territory.countries_included.include?(country)
       end
     end
 
@@ -69,25 +59,91 @@ module ONIX
       descriptive_detail.main_contributor if descriptive_detail
     end
 
+    def main_contributors
+      descriptive_detail.main_contributors if descriptive_detail
+    end
+
     def collection
       descriptive_detail.collection if descriptive_detail
     end
 
-    def title
-      descriptive_detail.title if descriptive_detail
+    [:title, :title_vo, :subtitle, :collection_title].each do |name|
+      send :define_method, name do
+        descriptive_detail.try(name) if descriptive_detail
+      end
+    end
+
+    def merge_collection_titles
+      # A veces viene desde Collection y otras veces
+      # desde DescriptiveDetail. Aqui probamos con ambas
+      if collection and collection.title.present?
+        collection.title
+      else
+        collection_title
+      end
+    end
+
+    def language_code
+      if descriptive_detail and descriptive_detail.main_language
+        descriptive_detail.main_language.language_code
+      end
+    end
+
+    def original_language_code
+      if descriptive_detail and descriptive_detail.original_language
+        descriptive_detail.original_language.language_code
+      end
+    end
+
+    def bic_code
+      descriptive_detail.bic_code if descriptive_detail
     end
 
     def imprints
       publishing_detail.imprints if publishing_detail
     end
 
-    def publishers
-      publishing_detail.publishers if publishing_detail
+    def main_publisher
+      publishing_detail.main_publisher if publishing_detail
+    end
+
+    def main_imprint
+      publishing_detail.imprint if publishing_detail
+    end
+
+    def product_supply_for(country)
+      product_supplies.find do |ps|
+        ps.market and 
+        ps.market.territory and 
+        ps.market.territory.valid_for?(country)
+      end
     end
 
     def price_amount(country='ES')
-      if supply = product_supply_for(country)
-        supply.price_amount 
+      if prod_supply = product_supply_for(country)
+        prod_supply.price_amount_for(country)
+      end
+    end
+
+    def resources
+      resources_hsh = {}      
+      collateral_detail.supporting_resources.each_with_index do |sr, n|
+        resources_hsh["#{n}_#{sr.content_type}"] = {'link' => sr.link,
+                                                    'access' => sr.access}
+      end if collateral_detail
+      resources_hsh
+    end
+
+    def cover_url
+      if collateral_detail
+        cover_resource = collateral_detail.supporting_resources.select{|sr| sr.content_type == 'covers'}
+        cover_resource.link if cover_resource.present? and !cover_resource.is_a?(Array)
+      end
+    end
+
+    def related_isbn
+      if related_material && related_product = related_material.related_physical_book
+        related_product.id_isbn13
       end
     end
 

@@ -17,7 +17,7 @@ module ONIX
     ######################
 
     def find_text_by_text_type(id)
-      text_contents.detect{|text| text.text_type == id}
+      text_contents.find{|text| text.text_type == id}
     end
 
     { 1 => :main_description,

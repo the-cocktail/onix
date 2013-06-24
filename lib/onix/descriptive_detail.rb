@@ -61,20 +61,31 @@ module ONIX
       end
     end
 
-    # TODO title_type indica si es el titulo de la serie 
-    # u otras muchas cosas (titulo traducido, abreviado ,alternativo, etc)
-    # quiza hay que poner title details como un array en caso de que nos pases
-    # mas de uno 
-    def main_title_detail
-      main = title_details.detect{|detail| detail.title_element and detail.title_element.title_element_level == 1 }
-    end
+    # Titles
+    ####################
 
-    def secondary_title_details
-      title_details - [main]
+    def main_title_detail
+      title_details.find{|td| td.title_type == 1 }
+    end    
+
+    def original_title_detail
+      title_details.find{|td| td.title_type == 3 }
     end
 
     def title
       main_title_detail.title if main_title_detail
+    end
+
+    def title_vo
+      original_title_detail.title if original_title_detail
+    end
+
+    def subtitle
+      main_title_detail.subtitle if main_title_detail
+    end
+
+    def collection_title
+      main_title_detail.collection_title if main_title_detail
     end
 
     # Contributors
@@ -82,22 +93,41 @@ module ONIX
 
     def main_contributor
       main = contributors.detect{|cont| cont.contributor_role == 'A01'}
-      main ||= contributors.detect{|cont| cont.start_with? 'A'}
+      main ||= contributors.detect{|cont| cont.contributor_role.start_with? 'A' and cont.contributor_role.gsub('A','').to_i < 15 }
       main
+    end
+
+    def main_contributors
+      contributors.select{|cont| cont.contributor_role.start_with? 'A' and cont.contributor_role.gsub('A','').to_i < 15 }
     end
 
     def secondary_contributors
       contributors - [main_contributor]
     end
 
+    # Languages
+    ####################
+
+    def main_language
+      languages.find{|lang| lang.language_role == 1}
+    end
+
+    def original_language
+      languages.find{|lang| lang.language_role == 2}
+    end
+
     # Subjects
     ####################
 
     def keywords
-      keywords_subject = subjects.detect{|subj| subj.subject_scheme_identifier == 20 }
+      keywords_subject = subjects.find{|subj| subj.subject_scheme_identifier == 20 }
       keywords_subject.subject_heading_text if keywords_subject
     end
 
+    def bic_code
+      bic_subject = subjects.find{|subj| subj.subject_scheme_identifier == 12 }
+      bic_subject.subject_code if bic_subject
+    end
 
 
   end
