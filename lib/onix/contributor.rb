@@ -24,5 +24,9 @@ module ONIX
     xml_accessor :biographical_note,    :from => "BiographicalNote"
 
 
+    def has_name?
+      person_name.present? || person_name_inverted.present?
+    end
+
   end
 end

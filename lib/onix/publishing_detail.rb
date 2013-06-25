@@ -35,7 +35,6 @@ module ONIX
     end
 
     def initialize
-      self.imprints = []
       self.publishers = []
     end
 

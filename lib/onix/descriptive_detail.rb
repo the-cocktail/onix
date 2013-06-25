@@ -88,6 +88,10 @@ module ONIX
       main_title_detail.collection_title if main_title_detail
     end
 
+    def subcollection_title
+      main_title_detail.subcollection_title if main_title_detail
+    end
+
     # Contributors
     ####################
 

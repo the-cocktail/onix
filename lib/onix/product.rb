@@ -67,7 +67,7 @@ module ONIX
       descriptive_detail.collection if descriptive_detail
     end
 
-    [:title, :title_vo, :subtitle, :collection_title].each do |name|
+    [:title, :title_vo, :subtitle, :collection_title, :subcollection_title].each do |name|
       send :define_method, name do
         descriptive_detail.try(name) if descriptive_detail
       end
@@ -80,6 +80,15 @@ module ONIX
         collection.title
       else
         collection_title
+      end
+    end
+
+    def merge_subcollection_titles
+      # Ocurre lo mismo que con el titulo de la coleccion
+      if collection and collection.subcollection_title.present?
+        collection.subcollection_title
+      else
+        subcollection_title
       end
     end
 
