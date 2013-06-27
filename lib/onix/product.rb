@@ -145,9 +145,16 @@ module ONIX
 
     def cover_url
       if collateral_detail
-        cover_resource = collateral_detail.supporting_resources.select{|sr| sr.content_type == 'covers'}
+        cover_resource = collateral_detail.supporting_resources.detect{|sr| sr.content_type == 'covers'}
         cover_resource.link if cover_resource.present? and !cover_resource.is_a?(Array)
       end
+    end
+
+    def sample_pages
+      if collateral_detail
+        sample_resource = collateral_detail.supporting_resources.detect{|sr| sr.content_type == 'sample_content'}
+        sample_resource.link if sample_resource.present? and !sample_resource.is_a?(Array)
+      end      
     end
 
     def related_isbn
