@@ -157,9 +157,11 @@ module ONIX
       end      
     end
 
-    def related_isbn
-      if related_material && related_product = related_material.related_physical_book
-        related_product.id_isbn13
+    def related_isbns
+      if related_material && related_products = related_material.related_physical_books
+        related_products.map(&:id_isbn13).compact
+      else
+        []
       end
     end
 
