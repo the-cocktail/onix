@@ -129,10 +129,15 @@ module ONIX
       end
     end
 
-    def price_amount(country='ES')
-      if prod_supply = product_supply_for(country)
-        prod_supply.price_amount_for(country)
+    def product_supply_from_supply_detail_for(country='ES')
+      product_supplies.find do |ps|
+        ps.supply_detail.has_price_for?(country)
       end
+    end
+
+    def price_amount(country='ES')
+      prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
+      prod_supply.price_amount_for(country) if prod_supply
     end
 
     def resources

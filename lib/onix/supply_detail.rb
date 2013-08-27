@@ -14,5 +14,13 @@ module ONIX
 			price.price_amount if price    	
     end
 
+    def has_price_for?(country='ES')
+      prices.find do |price|
+        price.territory and
+        price.territory.countries_included and
+        price.territory.countries_included.include?(country)
+      end
+    end
+
   end
 end
