@@ -122,9 +122,10 @@ module ONIX
 
     def product_supply_for(country)
       product_supplies.find do |ps|
-        ps.market and 
-        ps.market.territory and 
-        ps.market.territory.valid_for?(country)
+        ps.markets.find do |mrkt|
+          mrkt.territory and 
+          mrkt.territory.valid_for?(country)
+        end
       end
     end
 
