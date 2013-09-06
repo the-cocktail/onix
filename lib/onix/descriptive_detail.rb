@@ -50,7 +50,11 @@ module ONIX
     end
 
     def technical_protection?
-      epub_technical_protection and epub_technical_protection != '00'
+      if epub_technical_protection 
+        %w(01 03 04 05).include?(epub_technical_protection)
+      else
+        false
+      end
     end
 
     def technical_protection

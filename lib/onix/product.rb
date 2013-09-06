@@ -171,5 +171,11 @@ module ONIX
       end
     end
 
+    def technical_protection?
+      if descriptive_detail
+        descriptive_detail.technical_protection?
+      end
+    end
+
   end
 end
