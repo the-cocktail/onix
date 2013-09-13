@@ -177,5 +177,16 @@ module ONIX
       end
     end
 
+    def publishing_date(country='ES')
+      if product_supply = product_supply_for(country)
+        product_supply.market_date
+      end
+    end
+
+    def saleable?(country='ES')
+      # product_supply_for(country).try(:published?) and                      #MarketPublishingStatus y ProductSupply
+      publishing_detail and publishing_detail.available_in?(country)        #SalesRights
+    end
+
   end
 end

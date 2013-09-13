@@ -64,5 +64,9 @@ module ONIX
       end
     end
 
+    def published?
+      market_publishing_detail && market_publishing_detail.published?
+    end
+
   end
 end

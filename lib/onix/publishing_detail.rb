@@ -48,7 +48,7 @@ module ONIX
 
     def available_in?(country)
       if sales_rights and sales_rights.territory and sales_rights.territory.countries_included
-        sales_rights.territory.countries_included.include? country
+        sales_rights.territory.valid_for? country
       end
     end
 
