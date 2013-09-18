@@ -17,8 +17,8 @@ module ONIX
     end
 
     def market_date
-      if  market_publishing_detail and market_publishing_detail.market_date
-        market_publishing_detail.market_date.date 
+      if market_publishing_detail and market_publishing_detail.market_date
+        market_publishing_detail.market_date.full_date
       end
     end
 

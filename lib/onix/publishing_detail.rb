@@ -8,7 +8,7 @@ module ONIX
 
     xml_accessor :imprint, :from => "Imprint", :as => ONIX::Imprint
     xml_accessor :publishers, :from => "Publisher", :as => [ONIX::Publisher]
-    xml_accessor :publishing_status, :from => "PublishingStatus", :as => Fixnum, :to_xml => ONIX::Formatters.two_digit
+    xml_accessor :publishing_status, :from => "PublishingStatus", :as => Fixnum
     xml_accessor :publishing_date, :from => "PublishingDate", :as => ONIX::PublishingDate
     xml_accessor :sales_rights, :from => "SalesRights", :as => ONIX::SalesRights
 
@@ -48,7 +48,7 @@ module ONIX
 
     def available_in?(country)
       if sales_rights and sales_rights.territory and sales_rights.territory.countries_included
-        sales_rights.territory.valid_for? country
+        sales_rights.territory.valid_for?(country) && (publishing_status==4)
       end
     end
 

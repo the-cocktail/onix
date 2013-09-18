@@ -8,12 +8,20 @@ module ONIX
 
     xml_accessor :market_date_role, :from => "MarketDateRole"
     xml_accessor :date_format, :from => "DateFormat"
-    xml_accessor(:date, :from => "Date", :to_xml => ONIX::Formatters.yyyymmdd) do |val|
-      begin
-        Date.parse(val)
-      rescue
-        nil
+    xml_accessor(:date, :from => "Date")
+
+    def full_date
+      case self.date_format
+      when '00' then Date.strptime(self.date, '%Y%m%d')
+      when '01' then Date.strptime(self.date, '%Y%m')
+      when '02' then Date.strptime(self.date, '%Y%V')
+      when '04' then Date.strptime(self.date[0..-2], "%Y")
+      when '05' then Date.strptime(self.date, "%Y")
+      when '06' then Date.strptime(self.date.last(8), '%Y%m%d')
+      when '07' then Date.strptime(self.date.last(6), '%Y%m')
+      when '08' then Date.strptime(self.date.last(6), '%Y%V')
       end
+        
     end
 
 
