@@ -47,8 +47,9 @@ module ONIX
     end
 
     def available_in?(country)
-      if sales_rights and sales_rights.territory and sales_rights.territory.countries_included
-        sales_rights.territory.valid_for?(country) && (publishing_status==4)
+      if  sales_rights and sales_rights.territory
+        sales_rights.territory.valid_for?(country)# && (publishing_status==4)
+        # La condicion de Activo en venta se desactiva por ahora porque suele venir en nil
       end
     end
 
