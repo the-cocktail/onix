@@ -137,6 +137,10 @@ module ONIX
       bic_subject.subject_code if bic_subject
     end
 
+    def topics
+      subjects.map{|subj| "#{subj.subject_scheme_identifier}-#{subj.subject_code}-#{subj.subject_heading_text}"}
+    end
+
 
   end
 end
