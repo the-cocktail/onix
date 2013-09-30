@@ -185,7 +185,8 @@ module ONIX
 
     def saleable?(country='ES')
       # product_supply_for(country).try(:published?) and                      #MarketPublishingStatus y ProductSupply
-      publishing_detail and publishing_detail.available_in?(country)        #SalesRights
+      publishing_detail and publishing_detail.available_in?(country) and      #SalesRights
+      price_amount.present?
     end
 
   end
