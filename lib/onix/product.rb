@@ -140,6 +140,11 @@ module ONIX
       prod_supply.price_amount_for(country) if prod_supply
     end
 
+    def excluding_taxes?(country='ES')
+      prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
+      prod_supply.excluding_taxes?(country)
+    end
+
     def resources
       resources_hsh = {}      
       collateral_detail.supporting_resources.each_with_index do |sr, n|

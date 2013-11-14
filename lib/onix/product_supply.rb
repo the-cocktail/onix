@@ -55,12 +55,23 @@ module ONIX
     def price_amount_for(country)
       if supply_detail
         price_for_country = supply_detail.prices.find do |price|
-          price.territory and price.territory.valid_for?('ES')
+          price.territory and price.territory.valid_for?(country)
         end
 
         price_for_country ||= supply_detail.prices.first
-        price_for_country.price_amount if price_for_country
+        price_for_country.total_price_amount if price_for_country
       end
+    end
+
+    def excluding_taxes?(country)
+      if supply_detail
+        price_for_country = supply_detail.prices.find do |price|
+          price.territory and price.territory.valid_for?(country)
+        end
+
+        price_for_country ||= supply_detail.prices.first
+        price_for_country.excluding_taxes? if price_for_country
+      end     
     end
 
     def published?

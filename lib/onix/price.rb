@@ -4,6 +4,8 @@ module ONIX
   class Price
     include ROXML
 
+    TAX_PERCENT = 1.21
+
     xml_name "Price"
 
     xml_accessor :price_type, :from => "PriceType", :as => Fixnum, :to_xml => ONIX::Formatters.two_digit
@@ -22,7 +24,17 @@ module ONIX
       !tax_included?
     end
 
+    def total_price_amount
+      if excluding_taxes?
+        (price_amount*TAX_PERCENT).round(2)
+      else
+        price_amount
+      end
+    end
     
+    def excluding_taxes?
+      [1,3,5,6,8,11,13,15,21,23,25,31,32,41].include?(price_type)
+    end
 
   end
 end

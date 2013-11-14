@@ -11,7 +11,7 @@ module ONIX
     xml_accessor :prices, :from => "Price", :as => [ONIX::Price]
 
     def price_amount
-			price.price_amount if price    	
+			price.total_price_amount if price    	
     end
 
     def has_price_for?(country='ES')
