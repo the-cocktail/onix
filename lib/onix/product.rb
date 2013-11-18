@@ -142,7 +142,7 @@ module ONIX
 
     def excluding_taxes?(country='ES')
       prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
-      prod_supply.excluding_taxes?(country)
+      prod_supply.excluding_taxes?(country) if prod_supply
     end
 
     def resources
