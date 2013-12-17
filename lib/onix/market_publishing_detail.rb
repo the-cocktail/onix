@@ -13,6 +13,13 @@ module ONIX
     	market_publishing_status == 4
     end
 
+    def presale_date?
+    	market_date and market_date.full_date.future?
+    end
+
+    def presale_date
+			market_date.full_date if presale_date?     	
+    end
 
   end
 end

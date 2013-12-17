@@ -34,6 +34,14 @@ module ONIX
       }
     end
 
+    def presale_date?
+      publishing_date and publishing_date.full_date.future?
+    end
+
+    def presale_date
+      publishing_date.full_date if presale_date?      
+    end
+
     def initialize
       self.publishers = []
     end

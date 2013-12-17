@@ -48,6 +48,19 @@ module ONIX
       supply_detail.product_availability%10 == 5) 
     end
 
+    # Sera preventa cuando el product_availability sea diferente a 10 y 11
+    def availability_allow_presale?
+      [10,11].include?(supply_detail.product_availability)
+    end
+
+    def presale_date
+      market_publishing_detail.presale_date if market_publishing_detail
+    end
+
+    def market_date
+      market_publishing_detail.market_date if market_publishing_detail
+    end
+
     def unknown?
       supply_detail and supply_detail.product_availability%10 == 9
     end
@@ -61,6 +74,14 @@ module ONIX
         price_for_country ||= supply_detail.prices.first
         price_for_country.total_price_amount if price_for_country
       end
+    end
+
+    def current_price(country)
+      supply_detail.current_price(country) if supply_detail
+    end
+
+    def valid_prices(country='ES')
+      supply_detail.valid_prices if supply_detail
     end
 
     def excluding_taxes?(country)

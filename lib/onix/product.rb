@@ -131,18 +131,65 @@ module ONIX
 
     def product_supply_from_supply_detail_for(country='ES')
       product_supplies.find do |ps|
-        ps.supply_detail.has_price_for?(country)
+        ps.supply_detail.prices.any?{|price| price.valid_for?(country)}
       end
     end
 
     def price_amount(country='ES')
+      current_price.try(:total_price_amount)
+    end
+
+    def current_price(country='ES')
       prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
-      prod_supply.price_amount_for(country) if prod_supply
+      prod_supply.current_price(country) if prod_supply
+    end
+
+    def valid_prices(country='ES')
+      prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
+      prod_supply.try(:valid_prices, country) || []
+    end
+
+    def will_price_change?
+      current_price.try(:end_date).present? || 
+      (valid_prices-[current_price.try(:info_hash)]).any?{|price| (price[:start_date] && price[:start_date].future?)}
+    end
+
+    def when_will_price_change
+      if will_price_change?
+        price_change = current_price.try(:end_date) 
+        if price_change.present?
+          price_change.next_day
+        else 
+          prices = (valid_prices-[current_price.try(:info_hash)]).select{|price| (price[:start_date] && price[:start_date].future?)}.
+          prices.each do |p|
+            price_change = p[:start_date] if price_change.blank? || price_change > p[:start_date]
+          end
+          price_change
+        end
+      end
+    end
+
+    def product_availability
+      prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
+      prod_supply.available? if prod_supply
     end
 
     def excluding_taxes?(country='ES')
       prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
       prod_supply.excluding_taxes?(country) if prod_supply
+    end
+
+    def presale_date?(country='ES')
+      prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
+      prod_supply && prod_supply.availability_allow_presale? &&
+      (prod_supply.presale_date.present? || (prod_supply.market_date.blank? && publishing_detail && publishing_detail.presale_date?))
+    end
+
+    def presale_date(country='ES')
+      prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
+      if presale_date? and (prod_supply || publishing_detail)
+        prod_supply.try(:presale_date) || publishing_detail.try(:presale_date)
+      end      
     end
 
     def resources
@@ -188,10 +235,60 @@ module ONIX
       end
     end
 
+    # Reglas de publicación desgún Tagus. 
+    # Los saleable_according... devuelven (por orden de prioridad):
+    # - WORLD si en la lista de derechos se menciona al mundo y el país NO esta excluido
+    # - El pais solicitado si existe en su lista de derechos.
+    # - false si se especifica una lista de derechos pero no esta ni el pais ni WORLD.
+    # - nil si no hay lista de derechos
     def saleable?(country='ES')
-      # product_supply_for(country).try(:published?) and                      #MarketPublishingStatus y ProductSupply
-      publishing_detail and publishing_detail.available_in?(country) and      #SalesRights
-      price_amount.present?
+      saleable_price = saleable_according_to_price(country)
+      saleable_ps = saleable_according_to_product_supply(country)
+      saleable_sr = saleable_according_to_sales_rights(country)
+
+      [country, 'WORLD'].include?(saleable_price) or
+      ( saleable_price == false and saleable_ps == 'WORLD' ) or
+      ( saleable_price == nil and [country, 'WORLD'].include?(saleable_ps) ) or
+      ( saleable_price == nil and saleable_ps == nil and [country, 'WORLD'].include?(saleable_sr) )
+    end
+
+    def saleable_according_to_price(country='ES')
+      outcome = nil
+      product_supplies.each do |ps|
+        (ps.try(:supply_detail).try(:prices)||[]).each do |price|
+          price_territory = price.try(:territory)
+          outcome = change_saleable(outcome, price_territory.validness_in(country)) if price_territory
+        end
+      end
+      outcome
+    end
+
+    def saleable_according_to_product_supply(country='ES')
+      outcome = nil
+      product_supplies.each do |ps|
+        ps.markets.each do |market|
+          product_supply_territory = market.try(:territory)
+          outcome = change_saleable(outcome, product_supply_territory.validness_in(country)) if product_supply_territory
+        end
+      end
+      outcome
+    end
+
+    def saleable_according_to_sales_rights(country='ES')
+      sales_rights_territory = publishing_detail.try(:sales_rights).try(:territory)
+      sales_rights_territory.validness_in(country) if sales_rights_territory
+    end
+
+    def change_saleable(old_value, new_value)
+      if old_value.nil? # Si es nil
+        new_value
+      elsif old_value.blank? && ![nil, false].include?(new_value) # Si es nil o false y el nuevo no lo es
+        new_value
+      elsif new_value == 'WORLD' # WORLD tiene prioridad sobre todo, incluido el país.
+        new_value
+      else
+        old_value
+      end
     end
 
   end

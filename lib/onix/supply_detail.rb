@@ -14,12 +14,25 @@ module ONIX
 			price.total_price_amount if price    	
     end
 
-    def has_price_for?(country='ES')
-      prices.find do |price|
-        price.territory and
-        price.territory.countries_included and
-        price.territory.countries_included.include?(country)
-      end
+    def current_price(country)
+      # Es obligatorio que o sea para el país o que no especifique país.
+      # Ordenados por prioridad:
+      # Fecha inicio, fecha fin, fecha valida, precio con iva.
+      prices.select{|p| p.valid_for?(country) && p.has_range_dates? && p.valid_date? && p.tax_included? }.first || 
+      # Fecha inicio, fecha fin, fecha valida, precio sin iva
+      prices.select{|p| p.valid_for?(country) && p.has_range_dates? && p.valid_date? && p.tax_excluded? }.first ||
+      # Fecha inicio, fecha valida, precio con iva 
+      prices.select{|p| p.valid_for?(country) && p.has_start_date? && p.valid_date? && p.tax_included? }.first ||  
+      # Fecha inicio, fecha valida, precio sin iva
+      prices.select{|p| p.valid_for?(country) && p.has_start_date? && p.valid_date? && p.tax_excluded? }.first ||  
+      # Sin fecha, precio con iva
+      prices.select{|p| p.valid_for?(country) && p.tax_included? }.first ||
+      # Sin fecha, precio sin iva
+      prices.select{|p| p.valid_for?(country) && p.tax_excluded? }.first
+    end
+
+    def valid_prices
+      prices.map(&:info_hash).compact
     end
 
   end
