@@ -31,15 +31,15 @@ module ONIX
     end
 
     def will_be_available?
-      supply_detail and supply_detail.product_availability%10 == 1
+      supply_detail and supply_detail.product_availability/10 == 1
     end
 
     def available?
-      supply_detail and supply_detail.product_availability%10 == 2
+      supply_detail and supply_detail.product_availability/10 == 2
     end
 
     def temporarily_unavailable?
-      supply_detail and supply_detail.product_availability%10 == 3
+      supply_detail and supply_detail.product_availability/10 == 3
     end
 
     def not_available?
@@ -50,7 +50,7 @@ module ONIX
 
     # Sera preventa cuando el product_availability sea diferente a 10 y 11
     def availability_allow_presale?
-      [10,11].include?(supply_detail.product_availability)
+      ![10,11].include?(supply_detail.product_availability)
     end
 
     def presale_date

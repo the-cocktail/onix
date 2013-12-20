@@ -11,6 +11,7 @@ module ONIX
     xml_accessor :regions_inc,    from: 'RegionsIncluded'
     xml_accessor :regions_exc,    from: 'RegionsExcluded'
 
+    # Cuando viene el </Territory> vacío, no debería contar como lista.
     def has_info?
       countries_inc.present? || countries_exc.present? || 
       regions_inc.present? || regions_exc.present?
@@ -26,14 +27,15 @@ module ONIX
     end
 
     def valid_for?(country='ES')
-    	( countries_included.include?(country)  or
-        regions_included.include?(country)    or
-        countries_included.include?('WORLD')  or
-        regions_included.include?('WORLD') ) and 
-      !(  countries_excluded.include?(country)  or
-          regions_excluded.include?(country)    or
-          countries_excluded.include?('WORLD')  or
-          regions_excluded.include?('WORLD') ) 
+      !has_info? or # Cuando viene el </Territory> vacío, no cuenta como lista de derechos y no bloquea.
+      ( ( countries_included.include?(country)  or
+          regions_included.include?(country)    or
+          countries_included.include?('WORLD')  or
+          regions_included.include?('WORLD') ) and 
+        !(  countries_excluded.include?(country)  or
+            regions_excluded.include?(country)    or
+            countries_excluded.include?('WORLD')  or
+            regions_excluded.include?('WORLD') ) )
     end
 
     # - WORLD si en el territory se menciona al mundo y el país NO esta excluido
@@ -47,7 +49,7 @@ module ONIX
       elsif (countries_included.include?(country) or regions_included.include?(country)) and
             !(countries_excluded.include?(country) or regions_excluded.include?(country))
         country
-      else
+      elsif has_info?
         false
       end      
     end

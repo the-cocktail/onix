@@ -160,7 +160,7 @@ module ONIX
         if price_change.present?
           price_change.next_day
         else 
-          prices = (valid_prices-[current_price.try(:info_hash)]).select{|price| (price[:start_date] && price[:start_date].future?)}.
+          prices = (valid_prices-[current_price.try(:info_hash)]).select{|price| (price[:start_date] && price[:start_date].future?)}
           prices.each do |p|
             price_change = p[:start_date] if price_change.blank? || price_change > p[:start_date]
           end
@@ -169,7 +169,7 @@ module ONIX
       end
     end
 
-    def product_availability
+    def product_availability(country='ES')
       prod_supply = product_supply_for(country) || product_supply_from_supply_detail_for(country)
       prod_supply.available? if prod_supply
     end
@@ -246,10 +246,11 @@ module ONIX
       saleable_ps = saleable_according_to_product_supply(country)
       saleable_sr = saleable_according_to_sales_rights(country)
 
-      [country, 'WORLD'].include?(saleable_price) or
-      ( saleable_price == false and saleable_ps == 'WORLD' ) or
-      ( saleable_price == nil and [country, 'WORLD'].include?(saleable_ps) ) or
-      ( saleable_price == nil and saleable_ps == nil and [country, 'WORLD'].include?(saleable_sr) )
+      product_availability and
+      ( [country, 'WORLD'].include?(saleable_price) or
+        ( saleable_price == false and saleable_ps == 'WORLD' ) or
+        ( saleable_price == nil and [country, 'WORLD'].include?(saleable_ps) ) or
+        ( saleable_price == nil and saleable_ps == nil and [country, 'WORLD'].include?(saleable_sr) ))
     end
 
     def saleable_according_to_price(country='ES')
