@@ -35,7 +35,7 @@ module ONIX
     end
 
     def presale_date?
-      publishing_date and publishing_date.full_date.future?
+      publishing_date and publishing_date.full_date and publishing_date.full_date.future?
     end
 
     def presale_date
