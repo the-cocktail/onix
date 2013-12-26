@@ -26,9 +26,9 @@ module ONIX
       # Fecha inicio, fecha valida, precio sin iva
       prices.select{|p| p.valid_for?(country) && p.has_start_date? && p.valid_date? && p.tax_excluded? }.first ||  
       # Sin fecha, precio con iva
-      prices.select{|p| p.valid_for?(country) && p.tax_included? }.first ||
+      prices.select{|p| p.valid_for?(country) && p.tax_included? && !p.has_dates? }.first ||
       # Sin fecha, precio sin iva
-      prices.select{|p| p.valid_for?(country) && p.tax_excluded? }.first
+      prices.select{|p| p.valid_for?(country) && p.tax_excluded? && !p.has_dates? }.first
     end
 
     def valid_prices

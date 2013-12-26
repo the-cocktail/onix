@@ -31,6 +31,10 @@ module ONIX
         price_amount.to_f
       end
     end
+
+    def has_dates?
+      price_dates.present?
+    end
     
     def excluding_taxes?
       [1,3,5,6,8,11,13,15,21,23,25,31,32,41].include?(price_type)
