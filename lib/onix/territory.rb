@@ -41,7 +41,9 @@ module ONIX
     # - WORLD si en el territory se menciona al mundo y el país NO esta excluido
     # - El pais solicitado si existe en su lista de derechos.
     # - false si se especifica una lista de derechos pero no esta ni el pais ni WORLD.
-    def validness_in(country='ES')
+    # Para cuando el sales_right_type es 03, los derechos se invierten. De ahi el invert.
+    def validness_in(country='ES', options = {})
+      return inverse_validness_in(country) if options[:invert].present?
       if  (countries_included.include?('WORLD') or regions_included.include?('WORLD')) and 
           !(countries_excluded.include?('WORLD') or regions_excluded.include?('WORLD') or
             countries_excluded.include?(country) or regions_excluded.include?(country))
@@ -49,9 +51,24 @@ module ONIX
       elsif (countries_included.include?(country) or regions_included.include?(country)) and
             !(countries_excluded.include?(country) or regions_excluded.include?(country))
         country
+      elsif !has_info? and options[:is_price].present?
+        []
       elsif has_info?
         false
       end      
+    end
+
+    def inverse_validness_in(country='ES')
+      if  (countries_excluded.include?('WORLD') or regions_excluded.include?('WORLD')) and 
+          !(countries_included.include?('WORLD') or regions_included.include?('WORLD') or
+            countries_included.include?(country) or regions_included.include?(country))
+        'WORLD'
+      elsif (countries_excluded.include?(country) or regions_excluded.include?(country)) and
+            !(countries_included.include?(country) or regions_included.include?(country))
+        country
+      elsif has_info?
+        false
+      end     
     end
 
 

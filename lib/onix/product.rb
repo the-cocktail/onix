@@ -235,22 +235,26 @@ module ONIX
       end
     end
 
-    # Reglas de publicación desgún Tagus. 
+    # Reglas de publicación según Tagus. 
     # Los saleable_according... devuelven (por orden de prioridad):
     # - WORLD si en la lista de derechos se menciona al mundo y el país NO esta excluido
     # - El pais solicitado si existe en su lista de derechos.
     # - false si se especifica una lista de derechos pero no esta ni el pais ni WORLD.
     # - nil si no hay lista de derechos
+    # Además, el saleable_price puede devolver un array vacio, lo que valdria si el resto de información esta incompleta
     def saleable?(country='ES')
       saleable_price = saleable_according_to_price(country)
       saleable_ps = saleable_according_to_product_supply(country)
       saleable_sr = saleable_according_to_sales_rights(country)
 
+      binding.pry if record_reference == '9788436827446'
+
       product_availability and
       ( [country, 'WORLD'].include?(saleable_price) or
         ( saleable_price == false and saleable_ps == 'WORLD' ) or
         ( saleable_price == nil and [country, 'WORLD'].include?(saleable_ps) ) or
-        ( saleable_price == nil and saleable_ps == nil and [country, 'WORLD'].include?(saleable_sr) ))
+        ( saleable_price == nil and saleable_ps == nil and [country, 'WORLD'].include?(saleable_sr) ) or 
+        ( saleable_price == [] and saleable_ps == nil and saleable_sr == nil )) # Nada rellenado pero <Territory/> en Price.
     end
 
     def saleable_according_to_price(country='ES')
@@ -258,7 +262,7 @@ module ONIX
       product_supplies.each do |ps|
         (ps.try(:supply_detail).try(:prices)||[]).each do |price|
           price_territory = price.try(:territory)
-          outcome = change_saleable(outcome, price_territory.validness_in(country)) if price_territory
+          outcome = change_saleable(outcome, price_territory.validness_in(country, {is_price: true})) if price_territory
         end
       end
       outcome
@@ -276,8 +280,10 @@ module ONIX
     end
 
     def saleable_according_to_sales_rights(country='ES')
-      sales_rights_territory = publishing_detail.try(:sales_rights).try(:territory)
-      sales_rights_territory.validness_in(country) if sales_rights_territory
+      sales_rights = publishing_detail.try(:sales_rights)
+      sales_rights_territory = sales_rights.try(:territory)
+      return sales_rights.valid? unless sales_rights.valid?
+      sales_rights_territory.validness_in(country, {invert: sales_rights.sales_rights_type=='03'}) if sales_rights and sales_rights_territory
     end
 
     def change_saleable(old_value, new_value)
