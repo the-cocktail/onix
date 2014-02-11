@@ -21,7 +21,6 @@ module ONIX
       when '07' then [DateTime.strptime(self.date.first(6), '%Y%m'),  DateTime.strptime(self.date.last(6), '%Y%m')]
       when '08' then [DateTime.strptime(self.date.first(6), '%Y%V'),  DateTime.strptime(self.date.last(6), '%Y%V')]
       when '14' then [DateTime.strptime(self.date.first(8), '%Y%m%d')]
-      else binding.pry
       end        
     end
 

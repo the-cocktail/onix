@@ -247,8 +247,6 @@ module ONIX
       saleable_ps = saleable_according_to_product_supply(country)
       saleable_sr = saleable_according_to_sales_rights(country)
 
-      binding.pry if record_reference == '9788436827446'
-
       product_availability and
       ( [country, 'WORLD'].include?(saleable_price) or
         ( saleable_price == false and saleable_ps == 'WORLD' ) or
