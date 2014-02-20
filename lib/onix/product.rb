@@ -280,7 +280,7 @@ module ONIX
     def saleable_according_to_sales_rights(country='ES')
       sales_rights = publishing_detail.try(:sales_rights)
       sales_rights_territory = sales_rights.try(:territory)
-      return sales_rights.valid? unless sales_rights.valid?
+      return sales_rights.valid? if sales_rights.present? && !sales_rights.valid?
       sales_rights_territory.validness_in(country, {invert: sales_rights.sales_rights_type=='03'}) if sales_rights and sales_rights_territory
     end
 
