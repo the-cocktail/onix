@@ -241,7 +241,10 @@ module ONIX
     # - El pais solicitado si existe en su lista de derechos.
     # - false si se especifica una lista de derechos pero no esta ni el pais ni WORLD.
     # - nil si no hay lista de derechos
-    # Además, el saleable_price puede devolver un array vacio, lo que valdria si el resto de información esta incompleta
+
+    # Además, el saleable_price puede devolver un array vacio
+    # En ese caso, para Price, es lo mismo si llega vacío (</Territory>) que si no llega (nil). Por eso usamos el "blank?". 
+    # Confirmado por Alejandro Alonso en un correo del 13 de Marzo 2014.
     def saleable?(country='ES')
       saleable_price = saleable_according_to_price(country)
       saleable_ps = saleable_according_to_product_supply(country)
@@ -250,9 +253,9 @@ module ONIX
       product_availability and
       ( [country, 'WORLD'].include?(saleable_price) or
         ( saleable_price == false and saleable_ps == 'WORLD' ) or
-        ( saleable_price == nil and [country, 'WORLD'].include?(saleable_ps) ) or
-        ( saleable_price == nil and saleable_ps == nil and [country, 'WORLD'].include?(saleable_sr) ) or 
-        ( saleable_price == [] and saleable_ps == nil and saleable_sr == nil )) # Nada rellenado pero <Territory/> en Price.
+        ( saleable_price.blank? and [country, 'WORLD'].include?(saleable_ps) ) or
+        ( saleable_price.blank? and saleable_ps == nil and [country, 'WORLD'].include?(saleable_sr) ) or 
+        ( saleable_price == [] and saleable_ps == nil and saleable_sr == nil )) 
     end
 
     def saleable_according_to_price(country='ES')
