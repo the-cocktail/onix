@@ -42,8 +42,13 @@ module ONIX
 
     def valid_for?(country='ES')
       # A veces el territory no viene. A veces sí viene, pero vacío (</Territory>). Otras viene y tiene información 
-      # Nos vale cuando no viene, o viene vacío o viene relleno con el país válido.
-      (territory.blank?) || (territory.present? && !territory.has_info?) || territory.valid_for?(country)
+      # Nos vale cuando no viene, o viene vacío o viene relleno con el país válido. 
+      # Además, debe tener un valor de impuestos válido.
+      valid_tax? && ( (territory.blank?) || (territory.present? && !territory.has_info?) || territory.valid_for?(country) )
+    end
+
+    def valid_tax?
+      tax.blank? || (1+(tax.tax_rate_percent/100)==TAX_PERCENT)
     end
 
     # Date on which a price becomes effective.
