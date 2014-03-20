@@ -48,7 +48,7 @@ module ONIX
     end
 
     def valid_tax?
-      tax.blank? || (1+(tax.tax_rate_percent/100)==TAX_PERCENT)
+      tax.blank? || tax.tax_rate_percent.blank? || (1+(tax.tax_rate_percent/100)==TAX_PERCENT)
     end
 
     # Date on which a price becomes effective.
