@@ -70,6 +70,9 @@ module ONIX
     def start_date
       if date = (price_dates.select(&:start_date?).first || price_dates.select(&:range_date?).first)
         date.full_date.first
+      else
+        # si no viene fecha de inicio para un precio, se pone el día de hoy
+        Time.now
       end
     end
 
