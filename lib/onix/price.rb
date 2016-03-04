@@ -82,7 +82,12 @@ module ONIX
       # Si viene como end_date, la fecha no es inclusiva. restamos un día para que lo sea y en nuestra bbdd sea coherente.
       if date = (price_dates.select(&:end_date?).first)
         end_date = date.full_date.first
-        end_date.prev_day if end_date
+        # si tenemos fecha de inicio igual que fecha de fin, estamos en un tagus today, oferta para un solo día
+        if end_date && start_date.to_date == end_date.to_date
+          end_date
+        elsif end_date
+          end_date.prev_day
+        end
       elsif date = price_dates.select(&:range_date?).first
         date.full_date.last
       end
