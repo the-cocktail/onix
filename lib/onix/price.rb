@@ -72,7 +72,7 @@ module ONIX
         date.full_date.first
       else
         # si no viene fecha de inicio para un precio, se pone el día de hoy
-        Time.now
+        Time.now.beginning_of_day
       end
     end
 
